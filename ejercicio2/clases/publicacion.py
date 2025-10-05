@@ -1,6 +1,6 @@
 from datetime import datetime
 import math
-
+from typing import Any
 # --- Función de utilidad de auditoría (local para este ejemplo) ---
 def registrar_evento(historial: list, campo: str, anterior: Any, nuevo: Any):
     """Registra un cambio de valor en el historial de eventos."""

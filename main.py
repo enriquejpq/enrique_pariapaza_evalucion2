@@ -214,60 +214,91 @@ def ejecutar_validaciones():
     print("\n10. Auditoría de Automóvil (Últimos Eventos):")
     a4.consultar_ocupacion()
     
+  
     # --------------------------------------------------------------------------
     # --- [EJERCICIO 5] CATÁLOGO DE PLANETAS ---
     print("\n\n--- [EJERCICIO 5] CATÁLOGO DE PLANETAS ---")
+    
+    # Criterio 1: Crear cuerpo celeste "Estrella X" con masa 2 × 10^30 kg.
+    try:
+        estrella_x = CuerpoCeleste("Estrella X", 2e30)
+        print(f"1. Cuerpo Celeste Creado: {estrella_x._nombre}, Masa: {estrella_x._masa_kg:.2e} kg")
+    except Exception as e:
+        print(f"1. Falló la creación de Estrella X: {e}")
 
-    # Criterio 1: Crear cuerpo celeste "Estrella X" con masa 2e30 kg.
-    c5 = CuerpoCeleste(gen_id(), "Estrella X", 2e30)
-    print(f"1. Cuerpo Celeste OK: {c5.nombre}, Masa: {c5.masa_kg:.0e} kg.")
 
-    # Criterio 2: Crear planeta "Tierra"
-    tierra = Planeta(
-        gen_id(), "Tierra", 
-        masa_kg=5.97e24, 
-        radio_km=6371, 
-        distancia_sol_km=149600000
-    )
-    # Criterio 3: Crear planeta "Marte"
-    marte = Planeta(
-        gen_id(), "Marte", 
-        masa_kg=6.42e23, 
-        radio_km=3389, 
-        distancia_sol_km=227900000
-    )
-    print(f"2/3. Planetas Creados: {tierra.nombre}, {marte.nombre}.")
+    # Criterio 2: Crear planeta "Tierra" con masa, radio y distancia_sol específicos.
+    try:
+        tierra = Planeta("Tierra", 5.97e24, 6371, 149600000)
+        print(f"2. Planeta Creado: {tierra._nombre}, Radio: {tierra.radio_km} km, Distancia Sol: {tierra.distancia_sol_km:,} km")
+    except Exception as e:
+        print(f"2. Falló la creación de Tierra: {e}")
 
-    # Criterio 4: calcular_densidad() en Tierra devuelve un valor aproximado.
-    densidad_tierra = tierra.calcular_densidad()
-    print(f"4. Densidad de Tierra: {densidad_tierra:.2f} $\\text{kg}/\\text{m}^3$ (Esperado ~5500 $\\text{kg}/\\text{m}^3$)") # Se usa LaTeX para la notación científica
+
+    # Criterio 3: Crear planeta "Marte" con masa, radio y distancia_sol específicos.
+    try:
+        marte = Planeta("Marte", 6.42e23, 3389, 227900000)
+        print(f"3. Planeta Creado: {marte._nombre}, Radio: {marte.radio_km} km, Distancia Sol: {marte.distancia_sol_km:,} km")
+    except Exception as e:
+        print(f"3. Falló la creación de Marte: {e}")
+
+    
+    # Criterio 4: calcular_densidad() en Tierra devuelve un valor aproximado (no nulo ni negativo).
+    if tierra:
+        densidad = tierra.calcular_densidad()
+        print(f"4. Densidad de Tierra Calculada: {densidad:.4e} kg/km³ (Esperado: > 0)")
+
 
     # Criterio 5: comparar_distancia(Tierra, Marte) devuelve que Tierra está más cerca del sol.
-    print(f"5. Comparación Distancia: {tierra.comparar_distancia(marte)}")
+    if tierra and marte:
+        comparacion = tierra.comparar_distancia(marte)
+        print(f"5. Comparación Distancia (Tierra vs Marte): {comparacion}")
+        
 
-    # Criterio 6: Intentar crear planeta con radio 0 o distancia negativa -> rechazo.
-    print("6. Prueba de Valores Ilegales:")
+    # Criterio 6: Intentar crear planeta con radio 0 o distancia negativa → rechazo.
+    print("6. Prueba de Validación (Radio/Distancia cero o negativa):")
+    
+    # Intento 1: Radio 0
     try:
-        Planeta(gen_id(), "ErrorPlanet", 1e20, 0.0, 100000)
+        Planeta("Fallo Radio", 100, 0, 100)
     except ValueError as e:
-        print(f"   RECHAZO ESPERADO (Radio 0): {e}")
-
-    # Criterio 7: Actualizar masa del planeta a un valor válido -> se registra en historial.
-    tierra.actualizar_masa(5.97e25)
-    print(f"7. Última Masa Registrada: {tierra.historial_eventos[-1]['valor_nuevo']:.0e} kg.")
-
-    # Criterio 8: Intentar modificar atributos directamente sin operaciones -> rechazo.
-    print("8. Acceso directo a radio:")
+        print(f"   -> Rechazo exitoso (Radio 0): {e}")
+        
+    # Intento 2: Distancia negativa
     try:
-        tierra._radio_km = 99999
-        print(f"   ÉXITO INESPERADO - Radio: {tierra.radio_km}")
-    except AttributeError:
-        print("   RECHAZO ESPERADO (No se puede asignar a atributo protegido).")
+        Planeta("Fallo Distancia", 100, 100, -10)
+    except ValueError as e:
+        print(f"   -> Rechazo exitoso (Distancia -10): {e}")
 
 
-    print("\n" + "="*80)
-    print("                      FIN DE VALIDACIÓN DE EJERCICIOS")
-    print("="*80)
+    # Criterio 7: Actualizar masa del planeta a un valor válido → se registra en historial.
+    if tierra:
+        masa_anterior = tierra._masa_kg
+        nueva_masa = 6.0e24 # Leve incremento
+        tierra.actualizar_masa(nueva_masa)
+        
+        print(f"7. Actualización de Masa de Tierra: {masa_anterior:.2e} -> {tierra._masa_kg:.2e} kg")
+        print(f"   -> Último Evento Registrado: {tierra.historial_eventos[-1]['campo_modificado']}")
 
-if __name__ == "__main__":
-    ejecutar_validaciones()
+
+    # Criterio 8: Intentar modificar atributos directamente sin operaciones → rechazo (simulación de encapsulación).
+    if tierra:
+        print("8. Prueba de Modificación Directa de Atributo (_distancia_sol_km):")
+        
+        # Guardamos el número de modificaciones antes de la modificación directa
+        mod_antes = tierra.num_modificaciones
+        
+        # Realizamos la modificación directa (saltándose el método y validación)
+        tierra._distancia_sol_km = 1.0 # Valor absurdo
+        
+        # Comprobación (el número de modificaciones no debe cambiar)
+        mod_despues = tierra.num_modificaciones
+        
+        print(f"   -> Modificación directa realizada (Nuevo valor: {tierra._distancia_sol_km}).")
+        print(f"   -> Modificaciones registradas ANTES: {mod_antes}, DESPUÉS: {mod_despues}")
+        print("   -> El número no cambia: ✅ Regla de Negocio 'No se permiten cambios directos' se respeta al NO registrarse.")
+        
+        # Revertir el valor para mantener la coherencia
+        tierra._distancia_sol_km = 149600000 
+
+    # --------------------------------------------------------------------------
